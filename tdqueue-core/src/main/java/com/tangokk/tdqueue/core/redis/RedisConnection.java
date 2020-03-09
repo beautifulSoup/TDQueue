@@ -18,7 +18,9 @@ public class RedisConnection {
     }
 
     public synchronized void init() {
-
+        if(jedisPool != null && ! jedisPool.isClosed()) {
+            return;
+        }
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(10);
         jedisPool = new JedisPool(jedisPoolConfig, conf.getHost(), conf.getPort(), 10000, conf.getPassword());
@@ -27,7 +29,12 @@ public class RedisConnection {
 
 
     public Jedis getJedis() {
-        return jedisPool.getResource();
+        if(jedisPool == null || jedisPool.isClosed()) {
+            init();
+        }
+        Jedis jedis = jedisPool.getResource();
+        jedis.select(conf.getDatabase());
+        return jedis;
     }
 
 

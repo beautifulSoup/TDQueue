@@ -5,6 +5,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>tdqueue-core</module>
+    <module>tdqueue-web</module>
   </modules>
 	<groupId>com.tangokk</groupId>
 	<artifactId>tdelay-queue</artifactId>

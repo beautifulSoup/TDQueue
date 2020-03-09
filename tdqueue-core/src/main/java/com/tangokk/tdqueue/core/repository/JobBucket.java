@@ -29,7 +29,7 @@ public class JobBucket {
         if(timeupJobKeys !=null && timeupJobKeys.size() > 0) {
             jedis.zrem(getKeyOfJobBucket(), timeupJobKeys.toArray(new String[0]));
         }
-
+        jedis.close();
         return timeupJobKeys;
     }
 
@@ -37,6 +37,7 @@ public class JobBucket {
     void pushJob(Job job) {
         Jedis jedis = redisConnection.getJedis();
         jedis.zadd(getKeyOfJobBucket(), job.getReadyTime(), job.getKeyOfJob());
+        jedis.close();
     }
 
 

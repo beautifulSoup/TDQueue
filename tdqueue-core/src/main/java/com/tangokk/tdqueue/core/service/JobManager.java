@@ -70,22 +70,24 @@ public class JobManager {
     /**
      * ack the job is processed
      *
-     * @param jobKey the key of job
+     * @param topic the topic of job to ack
+     * @param jobId the id of the job to ack
      * @return true ack process success, false ack process fail
      */
-    public boolean ackJobProcessed(String jobKey) {
-        return jobStateChecklist.compareAndSet(jobKey, JobState.FINISH.index, JobState.PROCESSING.index);
+    public boolean ackJobProcessed(String topic, String jobId) {
+        return jobStateChecklist.compareAndSet(Job.getJobKey(topic, jobId), JobState.FINISH.index, JobState.PROCESSING.index);
     }
 
     /**
      * cancel job by client only when job's state is ready or waiting.
      * If the job's state is processing or timeout or finish, it's can not be deleted
      *
-     * @param job
+     * @param topic the topic of the job to remove
+     * @param jobId the id of the job to remove
      * @return true remove job success, false remove job fail
      */
-    public boolean removeJob(Job job) {
-        return jobStateChecklist.compareAndSet(job.getKeyOfJob(), JobState.DELETED.index, JobState.READY.index, JobState.WAITING.index);
+    public boolean removeJob(String topic, String jobId) {
+        return jobStateChecklist.compareAndSet(Job.getJobKey(topic, jobId), JobState.DELETED.index, JobState.READY.index, JobState.WAITING.index);
     }
 
 

@@ -34,15 +34,18 @@ public class JobPool {
             return;
         }
         jedis.hset(getKeyOfJobPool(), job.getKeyOfJob(), jsonStr);
+        jedis.close();
     }
 
 
     public Job getJob(String jobKey) {
         Jedis jedis = redisConnection.getJedis();
         String json = jedis.hget(getKeyOfJobPool(), jobKey);
+        jedis.close();
         if(StringUtils.isEmpty(json)) {
             return null;
         }
+        jedis.close();
         Job ret = null;
         try {
              ret = JsonUtil.parseJson(json, Job.class);
@@ -60,6 +63,7 @@ public class JobPool {
             .collect(Collectors.toList())
             .toArray(new String[job.length]);
         jedis.hdel(getKeyOfJobPool(), jobKeysToDelete);
+        jedis.close();
     }
 
 

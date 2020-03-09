@@ -7,6 +7,7 @@ import com.tangokk.tdqueue.core.redis.RedisConnection;
 import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Transaction;
 
 @Slf4j
 public class ReadyQueue {
@@ -22,20 +23,26 @@ public class ReadyQueue {
 
     public void pushReadyJobKeys(Collection<String> jobKeys) {
         Jedis jedis = redisConnection.getJedis();
+        Transaction tx = jedis.multi();
         for(String jobKey : jobKeys) {
-            jedis.sadd(getKeyOfReadyQueue(Job.getTopicOfJobKey(jobKey)), jobKey);
+            tx.sadd(getKeyOfReadyQueue(Job.getTopicOfJobKey(jobKey)), jobKey);
         }
+        tx.exec();
+        jedis.close();
     }
 
 
     public void pushReadyJobKeys(String jobKey) {
         Jedis jedis = redisConnection.getJedis();
         jedis.sadd(getKeyOfReadyQueue(Job.getTopicOfJobKey(jobKey)), jobKey);
+        jedis.close();
     }
 
     public Collection<String> popReadyJobKeys(String topic, int count) {
         Jedis jedis = redisConnection.getJedis();
-        return jedis.spop(getKeyOfReadyQueue(topic), count);
+        Collection<String> ret = jedis.spop(getKeyOfReadyQueue(topic), count);
+        jedis.close();
+        return ret;
     }
 
     private String getKeyOfReadyQueue(String topic) {

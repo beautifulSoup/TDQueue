@@ -49,8 +49,16 @@ public class Job {
     }
 
 
+    @JsonIgnore
+    public static String getJobKey(String topic, String jobId) {
+        return topic + SPLIT_CHAR + jobId;
+    }
 
+
+    @JsonIgnore
     public static String getTopicOfJobKey(String jobKey) {
         return jobKey.split(SPLIT_CHAR)[0];
     }
+
+
 }

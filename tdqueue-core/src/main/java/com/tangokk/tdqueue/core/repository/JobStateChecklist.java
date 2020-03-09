@@ -25,6 +25,7 @@ public class JobStateChecklist {
     public void setJobState(String jobKey, Integer state) {
         Jedis jedis = redisConnection.getJedis();
         jedis.set(getRedisKeyOfJob(jobKey), state.toString());
+        jedis.close();
     }
 
 
@@ -32,6 +33,7 @@ public class JobStateChecklist {
     public Integer getJobState(String jobKey) {
         Jedis jedis = redisConnection.getJedis();
         String stateStr =  jedis.get(getRedisKeyOfJob(jobKey));
+        jedis.close();
         if(!StringUtils.isEmpty(stateStr)) {
             return Integer.parseInt(stateStr);
         } else {
@@ -48,8 +50,10 @@ public class JobStateChecklist {
             Transaction tx = jedis.multi();
             tx.set(redisKeyOfJob, newState.toString());
             tx.exec();
+            jedis.close();
             return true;
         } else {
+            jedis.close();
             return false;
         }
 
@@ -58,6 +62,7 @@ public class JobStateChecklist {
     public void removeJobState(String ... jobKeys) {
         Jedis jedis = redisConnection.getJedis();
         jedis.hdel(getKeyOfStateCheckList(), jobKeys);
+        jedis.close();
     }
 
     private String getKeyOfStateCheckList() {
