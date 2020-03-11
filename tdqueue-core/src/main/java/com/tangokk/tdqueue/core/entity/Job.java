@@ -1,9 +1,20 @@
 package com.tangokk.tdqueue.core.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Builder
+@Slf4j
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Job {
 
     public static final String SPLIT_CHAR = ":";
@@ -37,7 +48,21 @@ public class Job {
     /**
      * ready time in millseconds
      */
-    Long readyTime;
+    private Long readyTime;
+
+    public void initReadyTime() {
+        if(delay == null) {
+            log.error("Init ready time fail, the dalay is null");
+        }
+        readyTime = System.currentTimeMillis() + delay;
+    }
+
+
+    public Long getReadyTime() {
+        return readyTime;
+    }
+
+
 
     /**
      *
