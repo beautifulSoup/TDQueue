@@ -1,15 +1,16 @@
 package com.tangokk.tdqueue.core;
 
+import com.tangokk.tdqueue.core.redis.RedisConfiguration;
+
 public interface Constant {
 
 
-    String host = "r-bp11cf8caa7228d4.redis.rds.aliyuncs.com";
+    String host = "";
 
-    Integer port = 6379;
+    Integer port = 0;
 
-    String password = "AuthGate1";
+    String password = "";
 
     Integer database = 51;
-
 
 }
