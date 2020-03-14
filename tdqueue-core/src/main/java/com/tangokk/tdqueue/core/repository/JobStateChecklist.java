@@ -61,7 +61,11 @@ public class JobStateChecklist {
 
     public void removeJobState(String ... jobKeys) {
         Jedis jedis = redisConnection.getJedis();
-        jedis.hdel(getKeyOfStateCheckList(), jobKeys);
+        String [] modified = new String[jobKeys.length];
+        for(int i=0;i<jobKeys.length;i++) {
+            modified[i] = getRedisKeyOfJob(jobKeys[i]);
+        }
+        jedis.del(modified);
         jedis.close();
     }
 

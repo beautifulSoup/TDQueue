@@ -38,7 +38,7 @@ public class JobManager {
         jobPool.addJob(job);
         if(job.getDelay() == null || job.getDelay() <=0 ) {  //don't need to delay, put in to the ready queue
             jobStateChecklist.setJobState(job.getKeyOfJob(), JobState.READY.index);
-            readyQueue.pushReadyJobKeys(job.getKeyOfJob());
+            readyQueue.pushReadyJobKey(job.getKeyOfJob());
         } else {
             jobStateChecklist.setJobState(job.getKeyOfJob(), JobState.WAITING.index);
             delayQueue.pushJob(job);

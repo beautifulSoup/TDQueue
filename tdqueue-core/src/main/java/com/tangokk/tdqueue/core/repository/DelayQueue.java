@@ -2,10 +2,8 @@ package com.tangokk.tdqueue.core.repository;
 
 import com.tangokk.tdqueue.core.entity.Job;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,15 +22,18 @@ public class DelayQueue {
 
     RedisConnection redisConnection;
 
+    ExecutorService executorService;
+
     public DelayQueue(Integer bucketCount, RedisConnection redisConnection) {
         this.bucketCount = bucketCount;
         this.redisConnection = redisConnection;
         initJobBucket(bucketCount);
+        executorService = Executors.newFixedThreadPool(bucketCount);
     }
 
 
     private void initJobBucket(Integer bucketCount) {
-        jobBuckets = new ArrayList<JobBucket>();
+        jobBuckets = new ArrayList<>();
         for(int i=0;i<bucketCount;i++) {
             JobBucket bucket = new JobBucket(redisConnection, i);
             jobBuckets.add(bucket);
@@ -40,14 +41,35 @@ public class DelayQueue {
     }
 
     public void pushJob(Job job) {
-        Long index = job.getReadyTime() % bucketCount;
-        jobBuckets.get(index.intValue()).pushJob(job);
+        long index = job.getReadyTime() % bucketCount;
+        jobBuckets.get((int) index).pushJob(job);
+    }
+
+    public void pushJobs(List<Job> jobs) {
+        Map<Integer, List<Job>> groupToBucketMap = new HashMap<>();
+        for(Job job:jobs) {
+            Integer index = (int)(job.getReadyTime() % bucketCount);
+            List<Job> bucketJobList = groupToBucketMap.computeIfAbsent(index, k -> new ArrayList<>());
+            bucketJobList.add(job);
+        }
+
+        for(int i =0;i<bucketCount;i++) {
+            List<Job> bucketJobList = groupToBucketMap.get(i);
+            if(bucketJobList != null) {
+                pushJobsToBucket(i, bucketJobList);
+            }
+        }
+
+    }
+
+    private void pushJobsToBucket(int index, List<Job> jobs) {
+        jobBuckets.get(index).pushJobs(jobs);
     }
 
     public List<String> popTimeUpJobKeys()  {
         List<String> ret = new ArrayList<String>();
-        ExecutorService executorService = Executors.newFixedThreadPool(bucketCount);
-        List<ScanBucketTask> tasks = new ArrayList<ScanBucketTask>();
+
+        List<ScanBucketTask> tasks = new ArrayList<>();
         for(int i=0;i<bucketCount;i++) {
             tasks.add(new ScanBucketTask(jobBuckets.get(i)));
         }
@@ -59,10 +81,7 @@ public class DelayQueue {
                 ret.addAll(result);
             }
             return ret;
-        } catch (ExecutionException  e) {
-            log.error("wtf", e);
-            return Collections.emptyList();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             log.error("wtf", e);
             return Collections.emptyList();
         }
@@ -73,13 +92,12 @@ public class DelayQueue {
 
         JobBucket jobBucket;
 
-        public ScanBucketTask(JobBucket bucket) {
+        ScanBucketTask(JobBucket bucket) {
             jobBucket = bucket;
         }
 
-        public Collection<String> call() throws Exception {
-            Collection<String> keys = jobBucket.popTimeUpJobKeys();
-            return keys;
+        public Collection<String> call() {
+            return jobBucket.popTimeUpJobKeys();
         }
     }
 

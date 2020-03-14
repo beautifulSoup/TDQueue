@@ -32,7 +32,7 @@ public class ReadyQueue {
     }
 
 
-    public void pushReadyJobKeys(String jobKey) {
+    public void pushReadyJobKey(String jobKey) {
         Jedis jedis = redisConnection.getJedis();
         jedis.sadd(getKeyOfReadyQueue(Job.getTopicOfJobKey(jobKey)), jobKey);
         jedis.close();

@@ -3,12 +3,12 @@ package com.tangokk.tdqueue.core;
 public interface Constant {
 
 
-    String host = "r-bp11cf8caa7228d4.redis.rds.aliyuncs.com";
+    String host = "49.233.198.214";
 
-    Integer port = 6379;
+    Integer port = 6378;
 
-    String password = "AuthGate1";
+    String password = "123456789tang";
 
-    Integer database = 51;
+    Integer database = 1;
 
 }

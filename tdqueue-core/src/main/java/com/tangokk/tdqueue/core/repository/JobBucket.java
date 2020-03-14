@@ -4,6 +4,9 @@ import com.tangokk.tdqueue.core.conf.ClusterConfigurationImpl;
 import com.tangokk.tdqueue.core.entity.Job;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 
@@ -37,6 +40,16 @@ public class JobBucket {
     void pushJob(Job job) {
         Jedis jedis = redisConnection.getJedis();
         jedis.zadd(getKeyOfJobBucket(), job.getReadyTime(), job.getKeyOfJob());
+        jedis.close();
+    }
+
+    void pushJobs(Collection<Job> jobs) {
+        Jedis jedis = redisConnection.getJedis();
+        Map<String, Double> scoreMembers = new HashMap<>();
+        for(Job job : jobs) {
+            scoreMembers.put(job.getKeyOfJob(), job.getReadyTime().doubleValue());
+        }
+        jedis.zadd(getKeyOfJobBucket(),scoreMembers);
         jedis.close();
     }
 

@@ -10,16 +10,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JobPoolTest {
+public class JobPoolTest extends BaseRedisRepoTest {
 
 
     JobPool jobPool;
 
     @Before
     public void init() {
-        RedisConfiguration config = new RedisConfiguration(Constant.host, Constant.port, Constant.password, Constant.database);
-        RedisConnection connection = new RedisConnection(config);
-        jobPool = new JobPool(connection);
+        jobPool = new JobPool(getConnection());
     }
 
 

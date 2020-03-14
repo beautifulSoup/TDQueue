@@ -12,16 +12,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class JobBucketTest {
+public class JobBucketTest extends BaseRedisRepoTest{
 
 
     JobBucket bucket;
 
     @Before
     public void init() {
-        RedisConfiguration configuration = new RedisConfiguration(Constant.host, Constant.port, Constant.password, Constant.database);
-        RedisConnection redisConnection = new RedisConnection(configuration);
-        bucket = new JobBucket(redisConnection, 0);
+        bucket = new JobBucket(getConnection(), 10);
     }
 
     @Test
