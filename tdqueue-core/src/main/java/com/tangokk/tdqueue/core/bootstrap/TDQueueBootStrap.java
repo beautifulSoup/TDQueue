@@ -26,13 +26,7 @@ public class TDQueueBootStrap {
 
 
     public static void main(String [] args) {
-        String host = "r-bp11cf8caa7228d4.redis.rds.aliyuncs.com";
-        Integer port = 6379;
-        String password = "AuthGate1";
-        Integer database = 51;
 
-        RedisConfiguration configuration = new RedisConfiguration(host, port, password, database);
-        JobManager jobManager = TDQueueBootStrap.bootstrap(configuration, 5);
     }
 
 }

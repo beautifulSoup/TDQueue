@@ -33,7 +33,7 @@ public class JobManager {
 
     public void pushJob(Job job) {
         if(job.getDelay() != null) {
-            job.setReadyTime(System.currentTimeMillis() + job.getDelay());
+            job.initReadyTime();
         }
         jobPool.addJob(job);
         if(job.getDelay() == null || job.getDelay() <=0 ) {  //don't need to delay, put in to the ready queue

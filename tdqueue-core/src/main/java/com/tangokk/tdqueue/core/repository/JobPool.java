@@ -66,6 +66,13 @@ public class JobPool {
         jedis.close();
     }
 
+    public void removeJobs(String ... jobKeys) {
+        Jedis jedis = redisConnection.getJedis();
+        jedis.hdel(getKeyOfJobPool(), jobKeys);
+        jedis.close();
+    }
+
+
 
 
     private String getKeyOfJobPool() {

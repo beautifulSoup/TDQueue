@@ -11,5 +11,4 @@ public interface Constant {
 
     Integer database = 51;
 
-
 }
