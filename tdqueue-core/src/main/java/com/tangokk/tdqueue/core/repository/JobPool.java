@@ -6,6 +6,8 @@ import com.tangokk.tdqueue.core.entity.Job;
 import com.tangokk.tdqueue.core.json.JsonUtil;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -30,10 +32,26 @@ public class JobPool {
         try {
             jsonStr = JsonUtil.generateJson(job);
         } catch (JsonProcessingException e) {
-            log.error("Serialize Job fail", e);
+            log.error("Serialize job fail", e);
             return;
         }
         jedis.hset(getKeyOfJobPool(), job.getKeyOfJob(), jsonStr);
+        jedis.close();
+    }
+
+    public void addJobs(Job [] jobs) {
+        Map<String, String> dataMap = new HashMap<>();
+        Arrays.stream(jobs)
+                .forEach(j ->{
+                    try {
+                        String jsonStr = JsonUtil.generateJson(j);
+                        dataMap.put(j.getKeyOfJob(), jsonStr);
+                    } catch (JsonProcessingException e) {
+                        log.error("Serialize job fail", e);
+                    }
+                });
+        Jedis jedis = redisConnection.getJedis();
+        jedis.hset(getKeyOfJobPool(), dataMap);
         jedis.close();
     }
 

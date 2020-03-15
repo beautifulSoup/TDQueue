@@ -21,7 +21,7 @@ public class ReadyQueue {
         this.redisConnection = redisConnection;
     }
 
-    public void pushReadyJobKeys(Collection<String> jobKeys) {
+    public void pushReadyJobKeys(String [] jobKeys) {
         Jedis jedis = redisConnection.getJedis();
         Transaction tx = jedis.multi();
         for(String jobKey : jobKeys) {

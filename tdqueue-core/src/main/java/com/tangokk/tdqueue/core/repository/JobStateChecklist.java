@@ -5,6 +5,8 @@ import com.sun.istack.internal.Nullable;
 import com.tangokk.tdqueue.core.conf.ClusterConfigurationImpl;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
 import java.util.Arrays;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
@@ -25,6 +27,14 @@ public class JobStateChecklist {
     public void setJobState(String jobKey, Integer state) {
         Jedis jedis = redisConnection.getJedis();
         jedis.set(getRedisKeyOfJob(jobKey), state.toString());
+        jedis.close();
+    }
+
+    public void setJobsState(Map<String, Integer> stateMap) {
+        Jedis jedis = redisConnection.getJedis();
+        Transaction tx = jedis.multi();
+        stateMap.forEach((key, value) -> tx.set(getRedisKeyOfJob(key), value.toString()));
+        tx.exec();
         jedis.close();
     }
 

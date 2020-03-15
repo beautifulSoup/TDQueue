@@ -47,7 +47,7 @@ public class DelayQueueTest extends BaseRedisRepoTest {
         jobs.forEach(j -> {
             keyJobMap.put(j.getKeyOfJob(), j);
         });
-        delayQueue.pushJobs(jobs);
+        delayQueue.pushJobs(jobs.toArray(new Job[0]));
         System.out.println(""+System.currentTimeMillis());
         List<String> batch1 = delayQueue.popTimeUpJobKeys();
         for(String key : batch1) {

@@ -39,7 +39,7 @@ public class ReadyQueueTest extends BaseRedisRepoTest {
         for(int i=0;i<100;i++) {
             jobKeys.add(Job.getJobKey(topic,  "" + System.currentTimeMillis() + i));
         }
-        readyQueue.pushReadyJobKeys(jobKeys);
+        readyQueue.pushReadyJobKeys(jobKeys.toArray(new String[0]));
         Collection<String> readyKeys1 = readyQueue.popReadyJobKeys(topic, 50);
         Assert.assertEquals(50, readyKeys1.size());
         Collection<String> readyKeys2 = readyQueue.popReadyJobKeys(topic, 100);

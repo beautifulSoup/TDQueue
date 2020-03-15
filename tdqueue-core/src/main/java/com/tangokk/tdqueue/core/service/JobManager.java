@@ -6,8 +6,8 @@ import com.tangokk.tdqueue.core.repository.DelayQueue;
 import com.tangokk.tdqueue.core.repository.JobPool;
 import com.tangokk.tdqueue.core.repository.JobStateChecklist;
 import com.tangokk.tdqueue.core.repository.ReadyQueue;
-import java.util.Collection;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +43,28 @@ public class JobManager {
             jobStateChecklist.setJobState(job.getKeyOfJob(), JobState.WAITING.index);
             delayQueue.pushJob(job);
         }
+    }
+
+    public void pushJobs(Job [] jobs) {
+        List<Job> delayJobs = new ArrayList<>();
+        Map<String, Integer> delayStateMap = new HashMap<>();
+        List<Job> readyJobs = new ArrayList<>();
+        Map<String, Integer> readyStateMap = new HashMap<>();
+        Arrays.stream(jobs)
+                .forEach(j -> {
+                    if(j.getDelay() == null || j.getDelay() <=0) {
+                        readyJobs.add(j);
+                        readyStateMap.put(j.getKeyOfJob(), JobState.READY.index);
+                    } else {
+                        delayJobs.add(j);
+                        delayStateMap.put(j.getKeyOfJob(), JobState.WAITING.index);
+                    }
+                });
+        jobPool.addJobs(jobs);
+        jobStateChecklist.setJobsState(readyStateMap);
+        readyQueue.pushReadyJobKeys(readyJobs.stream().map(Job::getKeyOfJob).toArray(String[]::new));
+        jobStateChecklist.setJobsState(delayStateMap);
+        delayQueue.pushJobs(delayJobs.toArray(new Job[0]));
     }
 
 

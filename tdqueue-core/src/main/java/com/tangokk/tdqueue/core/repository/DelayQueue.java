@@ -45,7 +45,7 @@ public class DelayQueue {
         jobBuckets.get((int) index).pushJob(job);
     }
 
-    public void pushJobs(List<Job> jobs) {
+    public void pushJobs(Job[] jobs) {
         Map<Integer, List<Job>> groupToBucketMap = new HashMap<>();
         for(Job job:jobs) {
             Integer index = (int)(job.getReadyTime() % bucketCount);
@@ -63,7 +63,7 @@ public class DelayQueue {
     }
 
     private void pushJobsToBucket(int index, List<Job> jobs) {
-        jobBuckets.get(index).pushJobs(jobs);
+        jobBuckets.get(index).pushJobs(jobs.toArray(new Job[0]));
     }
 
     public List<String> popTimeUpJobKeys()  {

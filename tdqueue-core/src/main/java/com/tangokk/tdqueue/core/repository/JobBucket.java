@@ -43,7 +43,7 @@ public class JobBucket {
         jedis.close();
     }
 
-    void pushJobs(Collection<Job> jobs) {
+    void pushJobs(Job [] jobs) {
         Jedis jedis = redisConnection.getJedis();
         Map<String, Double> scoreMembers = new HashMap<>();
         for(Job job : jobs) {
