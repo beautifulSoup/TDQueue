@@ -26,6 +26,7 @@ public class ScanQueueTask implements Runnable {
         @Override
         public void run() {
             try {
+                log.info("Delay queue scan: " +System.currentTimeMillis());
                 List<String> timeUpKeys = delayQueue.popTimeUpJobKeys();
                 processTimeUpJobs(timeUpKeys);
             } catch (Exception e) {
@@ -36,10 +37,15 @@ public class ScanQueueTask implements Runnable {
 
         private void processTimeUpJobs(Collection<String> timeUpKeys) {
             List<String> toReadyKeys = new ArrayList<>();
+            if(timeUpKeys.size() == 0) {
+                return;
+            }
+            Map<String, Integer> oldStateMap = jobStateChecklist.getJobsState(timeUpKeys.toArray(new String[0]));
             Map<String, Integer> jobStateMap = new HashMap<>();
+            //TODO too slow
             timeUpKeys
                 .forEach(k -> {
-                    Integer state = jobStateChecklist.getJobState(k);
+                    Integer state = oldStateMap.get(k);
                     if(state == null) {
                         log.error("wtf: state of job - {} is null", k);
                     } else if(state == JobState.WAITING.index) {

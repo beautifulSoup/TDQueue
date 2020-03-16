@@ -5,9 +5,8 @@ import com.tangokk.tdqueue.core.conf.ClusterConfigurationImpl;
 import com.tangokk.tdqueue.core.entity.Job;
 import com.tangokk.tdqueue.core.json.JsonUtil;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -63,7 +62,6 @@ public class JobPool {
         if(StringUtils.isEmpty(json)) {
             return null;
         }
-        jedis.close();
         Job ret = null;
         try {
              ret = JsonUtil.parseJson(json, Job.class);
@@ -71,6 +69,21 @@ public class JobPool {
             log.error("Deserialize Job fail", e);
         }
         return ret;
+    }
+
+    public Collection<Job> getJobs(String [] jobKeys) {
+        Jedis jedis = redisConnection.getJedis();
+        List<String> jsons = jedis.hmget(getKeyOfJobPool(), jobKeys);
+        List<Job> jobRet = new ArrayList<>();
+        jsons.forEach( j ->{
+                    try {
+                        Job job = JsonUtil.parseJson(j, Job.class);
+                        jobRet.add(job);
+                    } catch (JsonProcessingException e) {
+                        log.error("Deserialize Job fail", e);
+                    }
+                });
+        return jobRet;
     }
 
 

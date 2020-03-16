@@ -56,6 +56,7 @@ public class JobManager {
                         readyJobs.add(j);
                         readyStateMap.put(j.getKeyOfJob(), JobState.READY.index);
                     } else {
+                        j.initReadyTime();
                         delayJobs.add(j);
                         delayStateMap.put(j.getKeyOfJob(), JobState.WAITING.index);
                     }
@@ -76,15 +77,19 @@ public class JobManager {
      */
     public Collection<Job> popJobs(String topic, Integer count) {
         Collection<String> popedReadyJobKeys = readyQueue.popReadyJobKeys(topic, count);
-        List<Job> poppedJobs = popedReadyJobKeys.stream()
-            .filter(k -> ! jobStateChecklist.getJobState(k).equals(JobState.DELETED.index))  //filter jobs already been deleted
-            .map(k -> jobPool.getJob(k))
-            .collect(Collectors.toList());
+        Map<String, Integer> oldStateMap = jobStateChecklist.getJobsState(popedReadyJobKeys.toArray(new String[0]));
+
+        //TODO delete check
+        List<Job> poppedJobs = jobPool.getJobs(popedReadyJobKeys.toArray(new String[0]))
+                .stream()
+                .filter(j -> ! oldStateMap.get(j.getKeyOfJob()).equals(JobState.DELETED.index))
+                .collect(Collectors.toList());
         //go to processing
-        poppedJobs.
-            forEach(j -> {
-                jobStateChecklist.setJobState(j.getKeyOfJob(), JobState.PROCESSING.index);
-            });
+        Map<String, Integer> stateMap = new HashMap<>();
+
+        poppedJobs
+            .forEach(j -> stateMap.put(j.getKeyOfJob(), JobState.PROCESSING.index));
+        jobStateChecklist.setJobsState(stateMap);
         return poppedJobs;
     }
 

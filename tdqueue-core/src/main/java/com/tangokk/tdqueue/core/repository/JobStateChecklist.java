@@ -5,7 +5,10 @@ import com.sun.istack.internal.Nullable;
 import com.tangokk.tdqueue.core.conf.ClusterConfigurationImpl;
 import com.tangokk.tdqueue.core.redis.RedisConnection;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +52,22 @@ public class JobStateChecklist {
         } else {
             return null;  //UNKNOW
         }
+    }
+
+    public Map<String, Integer> getJobsState(String [] jobKeys) {
+        String [] redisKeysOfJobState = Arrays.stream(jobKeys)
+                .map(this::getRedisKeyOfJob)
+                .toArray(String[]::new);
+        Jedis jedis = redisConnection.getJedis();
+        List<String> stateStrSet =  jedis.mget(redisKeysOfJobState);
+        jedis.close();
+        Map<String, Integer> retMap = new HashMap<>();
+        for(int i=0;i<jobKeys.length;i++) {
+            if(!StringUtils.isEmpty(stateStrSet.get(i))) {
+                retMap.put(jobKeys[i], Integer.parseInt(stateStrSet.get(i)));
+            }
+        }
+        return retMap;
     }
 
     public boolean compareAndSet(String jobKey, Integer newState, Integer ... oldState) {

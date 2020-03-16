@@ -32,7 +32,6 @@ public class BucketScanTimer {
      * @param jobStateChecklist
      */
     public void startScan(DelayQueue delayQueue, ReadyQueue readyQueue, JobStateChecklist jobStateChecklist) {
-        log.info("Delay queue scan: " +System.currentTimeMillis());
         service.scheduleAtFixedRate(new ScanQueueTask(delayQueue, readyQueue, jobStateChecklist), 0, 1,
             TimeUnit.SECONDS);
     }
